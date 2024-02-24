@@ -22,6 +22,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -36,17 +38,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -99,7 +106,7 @@ fun ScreenSetup(viewModel: MainViewModel) {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MainScreen(
     allProduct: List<UserEntity>,
@@ -111,6 +118,8 @@ fun MainScreen(
             .background(DarkGrayBlue)
     ){
         var textState by remember { mutableStateOf("") }
+        val focusManager = LocalFocusManager.current
+        val keyboardController = LocalSoftwareKeyboardController.current
 
         Box(
             modifier = Modifier
@@ -153,6 +162,8 @@ fun MainScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(start = 20.dp, end = 20.dp),
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                                keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
                             )
                         }
 
@@ -192,53 +203,6 @@ fun MainScreen(
                 }
             }
 
-        }
-    }
-}
-
-@Composable
-fun UserList(
-    id: Int,
-    text: String,
-    checked: Boolean,
-    viewModel: MainViewModel
-) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(Color.LightGray)
-            .width(266.dp)
-            .height(98.dp)
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .fillMaxWidth()
-        ) {
-            Checkbox(
-                checked = checked,
-                onCheckedChange = {
-                    viewModel.updateProduct(UserEntity(id, text, !checked))
-                }
-            )
-
-            Text(
-                text = text,
-                textDecoration = if(checked) TextDecoration.LineThrough else null,
-            )
-
-            IconButton(onClick = {
-                viewModel.deleteProduct(UserEntity(id, text, checked))
-            }) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
-                    tint = White,
-                    modifier = Modifier.size(30.dp)
-                )
-            }
         }
     }
 }
